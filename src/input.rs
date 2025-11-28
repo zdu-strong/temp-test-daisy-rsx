@@ -60,6 +60,7 @@ pub struct InputProps {
     pub required: Option<bool>,
     pub disabled: Option<bool>,
     pub readonly: Option<bool>,
+    pub onchange: Option<Callback<FormEvent>>,
 }
 
 #[component]
@@ -87,6 +88,7 @@ pub fn Input(props: InputProps) -> Element {
             name: "{props.name}",
             placeholder: props.placeholder,
             step: props.step,
+            oninput: props.onchange.unwrap_or_default(),
             "type": "{input_type}",
         }
         if let Some(l) = props.help_text {
