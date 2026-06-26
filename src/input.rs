@@ -60,13 +60,24 @@ pub struct InputProps {
     pub required: Option<bool>,
     pub disabled: Option<bool>,
     pub readonly: Option<bool>,
-    pub oninput: Option<Callback<FormEvent>>,
+    pub onchange: Option<Callback<FormEvent>>,
+    pub bind_value: Option<Signal<String>>,
 }
 
 #[component]
 pub fn Input(props: InputProps) -> Element {
     let input_type = props.input_type.unwrap_or_default();
     let input_size = props.input_size.unwrap_or_default();
+    let value = match props.bind_value {
+        Some(bind_value) => format!("{}", bind_value),
+        _ => props.value.unwrap_or_default(),
+    };
+    let onchange = match props.bind_value {
+        Some(mut bind_value) => Callback::new(move |e: FormEvent| {
+            *bind_value.write() = e.value();
+        }),
+        _ => props.onchange.unwrap_or_default(),
+    };
 
     rsx!(
         match (props.label, props.required) {
@@ -81,14 +92,14 @@ pub fn Input(props: InputProps) -> Element {
         input {
             id: props.id,
             class: "input input-bordered {input_size}",
-            value: props.value,
+            value: value,
             required: props.required,
             disabled: props.disabled,
             readonly: props.readonly,
             name: "{props.name}",
             placeholder: props.placeholder,
             step: props.step,
-            oninput: props.oninput.unwrap_or_default(),
+            oninput: onchange,
             "type": "{input_type}",
         }
         if let Some(l) = props.help_text {
